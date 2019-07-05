@@ -1,0 +1,6 @@
+
+<RCC>
+  <qresource prefix="scaffolddatamapperstep">
+    <file>images/scaffoldmapper.png</file>
+  </qresource>
+</RCC>
