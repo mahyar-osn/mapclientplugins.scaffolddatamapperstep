@@ -71,7 +71,6 @@ class ConfigureDialog(QtGui.QDialog):
         self._previousIdentifier = self._ui.lineEdit0.text()
         config = {}
         config['identifier'] = self._ui.lineEdit0.text()
-        config[''] = self._ui.lineEdit1.text()
         return config
 
     def setConfig(self, config):
@@ -82,5 +81,3 @@ class ConfigureDialog(QtGui.QDialog):
         '''
         self._previousIdentifier = config['identifier']
         self._ui.lineEdit0.setText(config['identifier'])
-        self._ui.lineEdit1.setText(config[''])
-
