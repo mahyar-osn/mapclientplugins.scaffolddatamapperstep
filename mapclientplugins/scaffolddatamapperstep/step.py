@@ -24,7 +24,7 @@ class ScaffoldDataMapperStep(WorkflowStepMountPoint):
 
     def __init__(self, location):
         super(ScaffoldDataMapperStep, self).__init__('Scaffold Data Mapper', location)
-        self._configured = False  # A step cannot be executed until it has been configured.
+        self._configured = True  # A step cannot be executed until it has been configured.
         self._category = 'Registration'
         # Add any other initialisation code here:
         self._icon = QtGui.QImage(':/scaffolddatamapperstep/images/scaffoldmapper.png')
@@ -47,9 +47,10 @@ class ScaffoldDataMapperStep(WorkflowStepMountPoint):
         self._ephys_data_file_path = None  # file_location: data
         self._portData3 = None  #
         # Config:
-        self._config = {'identifier': ''}
+        self._config = {}
         self._view = None
         self._model = None
+        self._config['identifier'] = ''
 
     def execute(self):
         """
@@ -100,11 +101,11 @@ class ScaffoldDataMapperStep(WorkflowStepMountPoint):
         :param dataIn: The data to set for the port at the given index.
         """
         if index == 0:
-            self._scaffold_file_path = dataIn  # <not-set>
+            self._scaffold_file_path = dataIn
         elif index == 1:
-            self._ex_data_file_path = dataIn  #
+            self._ex_data_file_path = dataIn
         elif index == 2:
-            self._ephys_data_file_path = dataIn  #
+            self._ephys_data_file_path = dataIn
 
     def getPortData(self, index):
         """
