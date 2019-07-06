@@ -15,11 +15,11 @@ class ScaffoldDataMapperWidget(QtGui.QWidget):
 
         self._done_callback = None
         self._settings = {'view-parameters': {}}
-
+        self._model.set_model_settings_change_callback(self._setting_display)
         self._make_connections()
 
-    def _make_connection(self):
-        self._ui.sceneviewerWidget.graphics_initialized.connect(self._graphics_initialized)
+    def _make_connections(self):
+        self._ui.sceneviewerWidget.graphicsInitialized.connect(self._graphics_initialized)
         self._ui.doneButton.clicked.connect(self._done_clicked)
         self._ui.viewAllButton.clicked.connect(self._view_all)
         self._ui.yaw_doubleSpinBox.valueChanged.connect(self._yaw_clicked)
@@ -30,11 +30,11 @@ class ScaffoldDataMapperWidget(QtGui.QWidget):
         self._ui.positionZ_doubleSpinBox.valueChanged.connect(self._z_clicked)
 
     def _graphics_initialized(self):
-        scene_viewer = self._ui.sceneviewerWidget.get_zinc_sceneviewer()
+        scene_viewer = self._ui.sceneviewerWidget.getSceneviewer()
 
         if scene_viewer is not None:
-            scene = self._model.get_scaffold_scene()
-            self._ui.sceneviewerWidget.set_scene(scene)
+            scene = self._model.get_scene()
+            self._ui.sceneviewerWidget.setScene(scene)
 
             if len(self._settings['view-parameters']) == 0:
                 self._view_all()
@@ -52,6 +52,9 @@ class ScaffoldDataMapperWidget(QtGui.QWidget):
 
     def _done_clicked(self):
         self._done_callback()
+
+    def register_done_execution(self, done_callback):
+        self._done_callback = done_callback
 
     def _yaw_clicked(self):
         value = self._ui.yaw_doubleSpinBox.value()
@@ -79,3 +82,19 @@ class ScaffoldDataMapperWidget(QtGui.QWidget):
         value = self._ui.positionZ_doubleSpinBox.value()
         rate = self._ui.rateOfChange_horizontalSlider.value()
         self._model.translate_scaffold('Z', value, rate)
+
+    def _setting_display(self):
+        self._display_real(self._ui.yaw_doubleSpinBox, self._model.get_model_yaw_value())
+        self._display_real(self._ui.pitch_doubleSpinBox, self._model.get_model_pitch_value())
+        self._display_real(self._ui.roll_doubleSpinBox, self._model.get_model_roll_value())
+        self._display_real(self._ui.positionX_doubleSpinBox, self._model.get_model_X_value())
+        self._display_real(self._ui.positionY_doubleSpinBox, self._model.get_model_Y_value())
+        self._display_real(self._ui.positionZ_doubleSpinBox, self._model.get_model_Z_value())
+
+    @staticmethod
+    def _display_real(widget, value):
+        new_text = '{:.4g}'.format(value)
+        if isinstance(widget, QtGui.QDoubleSpinBox):
+            widget.setValue(value)
+        else:
+            widget.setText(new_text)
