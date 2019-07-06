@@ -28,6 +28,27 @@ class MasterModel(object):
     def get_region(self):
         return self._region
 
+    def get_scene(self):
+        return self._region.getScene()
+
+    def get_model_yaw_value(self):
+        return self._scaffold_model.get_yaw_value()
+
+    def get_model_pitch_value(self):
+        return self._scaffold_model.get_pitch_value()
+
+    def get_model_roll_value(self):
+        return self._scaffold_model.get_roll_value()
+
+    def get_model_X_value(self):
+        return self._scaffold_model.get_X_value()
+
+    def get_model_Y_value(self):
+        return self._scaffold_model.get_Y_value()
+
+    def get_model_Z_value(self):
+        return self._scaffold_model.get_Z_value()
+
     def initialise_graphics(self):
         self._scaffold_model.create_scaffold_graphics()
         self._data_model.create_data_graphics()
@@ -47,3 +68,5 @@ class MasterModel(object):
     def translate_scaffold(self, axis, value, rate):
         self._scaffold_model.translate_scaffold(axis, value, rate)
 
+    def set_model_settings_change_callback(self, settings_change_callback):
+        self._scaffold_model.set_settings_change_callback(settings_change_callback)
