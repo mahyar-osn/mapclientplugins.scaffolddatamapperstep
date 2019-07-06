@@ -78,7 +78,7 @@ class ScaffoldDataMapperStep(WorkflowStepMountPoint):
                 ephys_file_path = None
 
             self._model = MasterModel(self._scaffold_file_path, ex_file_path, ephys_file_path)
-
+            self._model.initialise_graphics()
             self._view = ScaffoldDataMapperWidget(self._model)
             self._view.register_done_execution(self._myDoneExecution)
 
