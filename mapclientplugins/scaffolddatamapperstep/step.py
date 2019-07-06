@@ -1,13 +1,19 @@
-
 """
 MAP Client Plugin Step
 """
+import os
 import json
 
 from PySide import QtGui
 
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclientplugins.scaffolddatamapperstep.configuredialog import ConfigureDialog
+from mapclientplugins.scaffolddatamapperstep.model.mastermodel import MasterModel
+from mapclientplugins.scaffolddatamapperstep.view.scaffolddatamapperwidget import ScaffoldDataMapperWidget
+
+
+EX_FILE_FORMATS = ['.exf', '.ex2', '.ex', '.exdata', 'exnode']
+EPHYS_FILE_FORMATS = ['.csv', '.tsv', '.json']
 
 
 class ScaffoldDataMapperStep(WorkflowStepMountPoint):
@@ -18,28 +24,32 @@ class ScaffoldDataMapperStep(WorkflowStepMountPoint):
 
     def __init__(self, location):
         super(ScaffoldDataMapperStep, self).__init__('Scaffold Data Mapper', location)
-        self._configured = False # A step cannot be executed until it has been configured.
+        self._configured = False  # A step cannot be executed until it has been configured.
         self._category = 'Registration'
         # Add any other initialisation code here:
-        self._icon =  QtGui.QImage(':/scaffolddatamapperstep/images/scaffoldmapper.png')
+        self._icon = QtGui.QImage(':/scaffolddatamapperstep/images/scaffoldmapper.png')
         # Ports:
         self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
                       'http://physiomeproject.org/workflow/1.0/rdf-schema#uses',
-                      '<not-set>'))
+                      'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location'))
         self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
                       'http://physiomeproject.org/workflow/1.0/rdf-schema#uses',
-                      ''))
+                      'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location'))
+        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
+                      'http://physiomeproject.org/workflow/1.0/rdf-schema#uses',
+                      'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location'))
         self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
                       'http://physiomeproject.org/workflow/1.0/rdf-schema#provides',
                       '<not-set>'))
         # Port data:
-        self._portData0 = None # <not-set>
-        self._portData1 = None # 
-        self._portData2 = None # <not-set>
+        self._scaffold_file_path = None  # file_location: scaffold
+        self._ex_data_file_path = None  # file_location: data
+        self._ephys_data_file_path = None  # file_location: data
+        self._portData3 = None  #
         # Config:
-        self._config = {}
-        self._config['identifier'] = ''
-        self._config[''] = ''
+        self._config = {'identifier': ''}
+        self._view = None
+        self._model = None
 
     def execute(self):
         """
@@ -48,6 +58,36 @@ class ScaffoldDataMapperStep(WorkflowStepMountPoint):
         may be connected up to a button in a widget for example.
         """
         # Put your execute step code here before calling the '_doneExecution' method.
+        if self._view is None:
+
+            _, ex_file_extension = os.path.splitext(self._ex_data_file_path)
+            if ex_file_extension in EX_FILE_FORMATS:
+                ex_file_path = self._ex_data_file_path
+            else:
+                raise TypeError('Invalid EX data format.')
+
+            _, ephys_file_extension = os.path.splitext(self._ephys_data_file_path)
+
+            if self._ephys_data_file_path is not None:
+                if ephys_file_extension in EPHYS_FILE_FORMATS:
+                    ephys_file_path = self._ephys_data_file_path
+                else:
+                    raise TypeError('Invalid Ephys data format.'
+                                    'Only csv, tsv, and json are supported.')
+            else:
+                ephys_file_path = None
+
+            self._model = MasterModel(self._scaffold_file_path, ex_file_path, ephys_file_path)
+
+            self._view = ScaffoldDataMapperWidget(self._model)
+            self._view.register_done_execution(self._myDoneExecution)
+
+        self._setCurrentWidget(self._view)
+
+    def _myDoneExecution(self):
+        self._portData3 = None
+        self._model = None
+        self._view = None
         self._doneExecution()
 
     def setPortData(self, index, dataIn):
@@ -60,9 +100,11 @@ class ScaffoldDataMapperStep(WorkflowStepMountPoint):
         :param dataIn: The data to set for the port at the given index.
         """
         if index == 0:
-            self._portData0 = dataIn # <not-set>
+            self._scaffold_file_path = dataIn  # <not-set>
         elif index == 1:
-            self._portData1 = dataIn # 
+            self._ex_data_file_path = dataIn  #
+        elif index == 2:
+            self._ephys_data_file_path = dataIn  #
 
     def getPortData(self, index):
         """
@@ -72,7 +114,7 @@ class ScaffoldDataMapperStep(WorkflowStepMountPoint):
 
         :param index: Index of the port to return.
         """
-        return self._portData2 # <not-set>
+        return self._portData3  # <not-set>
 
     def configure(self):
         """
@@ -126,5 +168,3 @@ class ScaffoldDataMapperStep(WorkflowStepMountPoint):
         d.identifierOccursCount = self._identifierOccursCount
         d.setConfig(self._config)
         self._configured = d.validate()
-
-
