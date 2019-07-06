@@ -1,5 +1,6 @@
 from opencmiss.zinc.field import Field
 from opencmiss.zinc.glyph import Glyph
+from opencmiss.zinc.material import Material
 from opencmiss.zinc.status import OK as ZINC_OK
 from opencmiss.utils.maths import vectorops as maths
 
@@ -13,6 +14,7 @@ class DataModel(object):
         self._ephys_file_path = ephys_file_path if ephys_file_path is not None else None
         self._data_coordinate_field = None
 
+        self._initialise_point_material()
         self._initialise_scene()
         self._initialise_ex_data()
 
@@ -21,6 +23,19 @@ class DataModel(object):
 
     def _initialise_scene(self):
         self._scene = self._region.getScene()
+
+    def _initialise_point_material(self):
+        self._material_module.beginChange()
+        cell_purple = self._material_module.createMaterial()
+        cell_purple.setName('cell_purple')
+        cell_purple.setManaged(True)
+        cell_purple.setAttributeReal3(Material.ATTRIBUTE_AMBIENT, [0.7, 0.0, 1.0])
+        cell_purple.setAttributeReal3(Material.ATTRIBUTE_DIFFUSE, [0.7, 0.0, 1.0])
+        cell_purple.setAttributeReal3(Material.ATTRIBUTE_EMISSION, [0.0, 0.0, 0.0])
+        cell_purple.setAttributeReal3(Material.ATTRIBUTE_SPECULAR, [0.1, 0.1, 0.1])
+        cell_purple.setAttributeReal(Material.ATTRIBUTE_ALPHA, 1.0)
+        cell_purple.setAttributeReal(Material.ATTRIBUTE_SHININESS, 0.2)
+        self._material_module.endChange()
 
     def get_scene(self):
         if self._scene is not None:
@@ -36,7 +51,7 @@ class DataModel(object):
         point_attr.setGlyphShapeType(Glyph.SHAPE_TYPE_SPHERE)
         point_size = self._get_auto_point_size()
         point_attr.setBaseSize(point_size)
-        points.setMaterial(self._material_module.findMaterialByName('yellow'))
+        points.setMaterial(self._material_module.findMaterialByName('cell_purple'))
         points.setName('display_points')
 
     def create_data_graphics(self):
@@ -45,7 +60,7 @@ class DataModel(object):
     def _get_auto_point_size(self):
         minimums, maximums = self._get_data_range()
         data_size = maths.magnitude(maths.sub(maximums, minimums))
-        return data_size
+        return 0.25 * data_size
 
     def _get_data_range(self):
         fm = self._region.getFieldmodule()
