@@ -1,6 +1,7 @@
-from PySide import QtGui
+from PySide import QtCore, QtGui
 
 from .ui_scaffolddatamapperwidget import Ui_ScaffoldDataMapper
+from .datamappersceneviewerwidget import DataMapperSceneviewerWidget
 
 
 class ScaffoldDataMapperWidget(QtGui.QWidget):
@@ -28,6 +29,10 @@ class ScaffoldDataMapperWidget(QtGui.QWidget):
         self._ui.positionX_doubleSpinBox.valueChanged.connect(self._x_clicked)
         self._ui.positionY_doubleSpinBox.valueChanged.connect(self._y_clicked)
         self._ui.positionZ_doubleSpinBox.valueChanged.connect(self._z_clicked)
+        self._ui.manualMapping_radioButton.clicked.connect(self._manual_mapping_selected)
+        self._ui.automaticMapping_radioButton.clicked.connect(self._auto_mapping_selected)
+        self._ui.createNode_checkBox.clicked.connect(self._create_node_selected)
+        self._ui.checkBox.clicked.connect(self._select_node_selected)
 
     def _graphics_initialized(self):
         scene_viewer = self._ui.sceneviewerWidget.getSceneviewer()
@@ -98,3 +103,21 @@ class ScaffoldDataMapperWidget(QtGui.QWidget):
             widget.setValue(value)
         else:
             widget.setText(new_text)
+
+    def _manual_mapping_selected(self):
+        self._ui.createNode_checkBox.setEnabled(True)
+
+    def _create_node_selected(self):
+        self._ui.checkBox.setEnabled(False) if self._ui.createNode_checkBox.isChecked() else\
+            self._ui.checkBox.setEnabled(True)
+
+    def _select_node_selected(self):
+        if self._ui.checkBox.isChecked():
+            self._ui.createNode_checkBox.setEnabled(False)
+        else:
+            self._ui.createNode_checkBox.setEnabled(True)
+        self._model.get_selection_data_location(self._ui.sceneviewerWidget.getOrCreateSelectionGroup())
+
+    def _auto_mapping_selected(self):
+        if self._ui.automaticMapping_radioButton.isChecked():
+            self._ui.createNode_checkBox.setEnabled(False)
