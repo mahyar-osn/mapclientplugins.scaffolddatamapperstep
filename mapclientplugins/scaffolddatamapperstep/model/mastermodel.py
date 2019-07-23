@@ -49,6 +49,10 @@ class MasterModel(object):
     def get_model_Z_value(self):
         return self._scaffold_model.get_Z_value()
 
+    def get_selection_data_location(self, field):
+        locations = self._data_model.get_data_location(field)
+        return locations
+
     def initialise_graphics(self):
         self._scaffold_model.create_scaffold_graphics()
         self._data_model.create_data_graphics()

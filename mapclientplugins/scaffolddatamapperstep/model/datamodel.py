@@ -110,3 +110,23 @@ class DataModel(object):
                     return field
             field = field_iter.next()
         raise ValueError('Could not determine data coordinate field')
+
+    @staticmethod
+    def get_data_location(field):
+        locations_list = list()
+        fm = field.getFieldmodule()
+        fm.beginChange()
+        cache = fm.createFieldcache()
+        datapoints = fm.findNodesetByFieldDomainType(Field.DOMAIN_TYPE_DATAPOINTS)
+        node_iter = datapoints.createNodeiterator()
+        node = node_iter.next()
+        while node.isValid():
+            cache.setNode(node)
+            _, coordinates = field.evaluateReal(cache, 3)
+            locations_list.append(coordinates)
+            node = node_iter.next()
+        fm.endChange()
+        return locations_list
+
+    def get_data_id(self, field):
+        return
